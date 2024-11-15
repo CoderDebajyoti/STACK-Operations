@@ -1,7 +1,3 @@
-Here's a structured README file based on typical GitHub formatting and your description:
-
----
-
 # STACK Operations
 
 A repository implementing stack data structures in C/C++. This project covers essential stack operations and demonstrates practical applications such as recursion and expression evaluation.
