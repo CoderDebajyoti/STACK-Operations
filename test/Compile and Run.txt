@@ -1,0 +1,2 @@
+gcc test_stack.c push.c pop.c peek.c utility.c -o test_stack
+./test_stack

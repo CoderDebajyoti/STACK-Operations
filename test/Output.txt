@@ -1,0 +1,26 @@
+Running all tests...
+
+Testing push operation...
+Pushed element = 10
+Pushed element = 20
+Pushed element = 30
+Pushed element = 40
+Pushed element = 50
+Unable to push 60 as the Stack Is Full
+Push test passed!
+
+Testing pop operation...
+Popped element = 30
+Popped element = 20
+Popped element = 10
+Stack Is Empty
+Pop test passed!
+
+Testing peek operation...
+Top element = 200
+Peek test passed!
+
+Testing isEmpty and isFull...
+isEmpty and isFull tests passed!
+
+All tests passed successfully!
