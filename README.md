@@ -63,13 +63,15 @@ Use the provided files to understand and test stack operations. Run individual i
 ```plaintext
 STACK-Operations
 ├── src
-│   ├── stack_array.c       # Array-based stack implementation
-│   ├── stack_linked_list.c # Linked-list-based stack implementation
-│   ├── stack.h             # Header file for stack functions
+│   ├── push.c
+│   ├── pop.c
+│   ├── peek.c
+│   ├── utility.c
+│   ├── stack.h
 ├── tests
-│   └── test_stack.c        # Test cases for stack operations
-├── README.md               # Repository documentation
-└── LICENSE                 # License file
+│   └── test_stack.c
+├── README.md
+└── LICENSE
 ```
 
 ## Contributing
