@@ -1,0 +1,2 @@
+gcc main.c push.c pop.c peek.c utility.c -o stack_program
+./stack_program

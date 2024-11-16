@@ -1,0 +1,2 @@
+gcc main.c push_linked_list.c pop_linked_list.c peek_linked_list.c isEmpty_linked_list.c -o stack_test
+./stack_test

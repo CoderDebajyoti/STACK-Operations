@@ -1,0 +1,13 @@
+Pushed element = 10
+Pushed element = 13
+Pushed element = 5
+Pushed element = 26
+Pushed element = 100
+Unable to push 78 as the Stack Is Full
+Top element = 100
+Popped element = 100
+Popped element = 26
+Popped element = 5
+Popped element = 13
+Popped element = 10
+Stack Is Empty

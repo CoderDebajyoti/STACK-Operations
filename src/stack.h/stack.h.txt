@@ -1,0 +1,314 @@
+Abstract Data Types
+In this lecture we will present two different implementations for an important data type stack.
+The goal of the lecture is to show a systematic design and implementation of a user defined data structure in the programming language C. Moreover, we will briefly look at the efficiency of our implementations introducing the technique of amortized analysis.
+
+Stack are used in many places in computer science
+
+algorithms (dfs search, etc.)
+compilers (parsing context free languages)
+programming languages (keeping track of procedure calls)
+operating systems (least recently used page replacement algorithm for virtual memory)
+We will describe a stack as an abstract data type, just by defining the data we want to store in our data type and the operations we want to perform on the data structure.
+
+Header Files
+We can define the "interface" to our data type in a header file. The actual implementation is unimportant for the usage of stacks, and is consequently hidden from the user. Also, as long as we keep the "interface" the same we can change the implementation of our data structure, without changing user programs which are using that data structure.
+
+File: stack.h
+#ifndef __STACK_H_
+#define __STACK_H_
+
+/* 
+ *  A stack is a ``first-in last-out'' data structure.
+ *  In this file, we define the operations we want to
+ *  apply to our ``abstract data structure''. All the
+ *  implementation details are hidden from the user.
+ */
+
+
+
+void push(int x);
+/* push new element on top of the stack */
+
+void stackinit();
+/* initializes the stack */
+
+int pop();
+/* pops element from the top of the stack and returns it */
+
+int top();
+/* returns element on top of the stack */
+
+int stacksize();
+/* number of elements in the stack */
+
+int isempty();
+/* checks if stack is empty */
+
+#endif
+Question: Which of the stack operations is not really necessary?
+
+Test Program
+Without worrying about the implementation of our data structure, we can write some code which is using the data structure. Our test program will push a series of numbers on the stack; afterwards, it pops numbers from the stack and prints them until the stack is empty.
+
+Now, that we have written the header file stack.h and the test program test_stack.c, we can compile the test program to have a quick syntax check:
+
+(slinky){biermann}[48]% gcc test_stack.c -c
+At this point, we can not create the executable, since we haven't implemented the data structure, so we have to compile with option -c.
+File: test_stack.c
+#include3 <stdio.h>
+#include "stack.h"
+
+int main() {
+  int i;
+  int x;
+
+  stackinit();
+
+  printf("push:\n");
+  for (i = 0; i < 100; ++i) {
+    printf("%d\t",i);
+    push(i);
+  }
+  
+  printf("pop:\n");
+  while (!isempty()) {
+    x = pop();
+    printf("%d\t",x);
+  }
+  printf("\n");
+  
+}
+Implementation 1
+This implementation of a stack uses an array to store the elements, and a variable for the index of the top of the stack. The code is straight forward. However, we have to fix a maximum size for the stack in advance since we can not change the size of an array at run time.
+
+Running Time
+The running time for each stack operation is constant. It doesn't matter how many elements are in the stack, the time for pushing or popping elements is always the same. We say that the time for each operation is O(1). In case you're not familiar with the O-notation, you should check it out in your algorithms text book (e.g. Cormen/Leiserson/Rivest).
+
+File: stack.c
+#include "stack.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+/*  this implementation of a stack uses a array of fixed size to hold
+ *  the elements pushed on the stack. The obvious shortcoming is we've
+ *  to fix in advance how many elements to store.  
+ */
+
+
+#define MAX_STACK_SIZE 100
+
+/* we represent a stack by an array, and a variable for the index of
+ * the top of the stack (called ``stackpointer'' though not actually a
+ * pointer variable) 
+ */
+
+int stackpointer;
+int A[MAX_STACK_SIZE];
+
+void stackinit() {
+  stackpointer = 0;
+  printf("initialized static stack.\n");
+}
+
+void push(int x) {
+  
+  if (stackpointer >= MAX_STACK_SIZE) {
+    printf("stack overflow!");
+    exit(0);
+  }
+  
+  A[stackpointer++] = x;
+}
+
+int pop() {
+  if (stackpointer <= 0) {
+    printf("stack underflow!");
+    exit(0);
+  }
+  return A[--stackpointer];
+}
+
+int top() {
+  if (stackpointer <= 0) {
+    printf("stack underflow!");
+    exit(0);
+  }
+  return A[stackpointer-1];
+}
+
+int stacksize() {
+  return stackpointer;
+}
+
+int isempty() {
+  return (stackpointer == 0);
+}
+Implementation 2
+In this implementation, we're using dynamic memory allocation to grow and shrink our stack as we go along.
+Our programming language C doesn't allow us to increase the size of an array. We could work with pointers to allocate a continuous block of memory; but again, we wouldn't be able to extend that block if we run out of space (the space at the end of that block memory could be already used for something else).
+
+Here's a simple strategy: Whenever we run out of space, we will allocate a larger piece of memory for a new stack, copy everything to the new stack, and release the memory for the old stack.
+
+In case we've only a few elements in our stack, we would like to shrink the stack to use the memory more efficiently.
+
+Our concrete implementation does the following
+
+Whenever the stackpointer raises above 3/4 * n, we will double the size of the stack (n is the size of our stack).
+Whenever the stackpointer drops below 1/4 * n, we will reduce the stack size to n/2.
+The intuition behind this algorithm is that resizing the stack takes some time, but it doesn't happen too frequently. So on average, we'll have only have a small running time. More precisely, we'll show that the average running time for any sequence of update operations (push, pop) is O(1).
+
+Assume that it takes time n to copy over n elements. We at look at two consecutive resize operations. Imagine that we've just resized our stack to contain n elements. Now, we perform a sequence of update operations which is causing another resize.
+
+There are four possible cases:
+
+increase to n, increase to 2n
+increase to n, decrease to n/2
+decrease to n, increase to 2n
+decrease to n, decrease to n/2
+We'll find lower bounds on the number of stack operations between the two resize operations. This way, we can bound the average running time of a sequence of operations.
+Cases:
+
+Since the stacksize was increased initially, there were (3/4)*(n/2) = (3/8)*n elements in the stack. During our sequence of operations, we added at least 3/8n elements to the stack to cause another resize.
+As above, there are initially 3/8n elements in the stack. In order to cause a resize, we have to pop 1/8n elements. (3/8n - 1/8n = 1/4n)
+The stacksize was decreased initially, so there are (1/4)*(2n) = n/2 elements in the stack. During our sequence of operations, we added n/4 elements to cause the increase.
+As above, there are initially n/2 elements in the stack. We have to remove at least n/4 elements to cause a further decrease in the stack size.
+The case study above shows that starting with a stack of size n, we've to perform at least n/8 operations to trigger a resize operation which takes time of at most n.
+
+We can amortize the time needed for the resize operation over the sequence of update operations:
+t_average = (sum(t_i) + n)/m, where t_i time of the i th update operation, m number of operations
+
+We assume that the time for a update operation to be constant, if the operations doesn't involve any stack resizing. Thus,
+t_average = O(1) + n/m < O(1) + n/(n/8) = O(1) + 8 = O(1)
+
+In other words, for any sequence of m stack operations, the average running time for each operation is constant. Even though, some operations might take longer than the others, on average this implementation is as fast as the naive stack implementation! (at least, up to a constant factor).
+
+File: betterstack.c
+#include "stack.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+/* in this implementation we represent the stack by a pointer to a
+ * user allocated piece of memory. Also, we need a variable for the
+ * index of the top of the stack. Additionally, we need a variable to
+ * store the current size of our stack
+ */
+
+int currentsize;
+int stackpointer;
+int *A = 0;
+
+/* a separate description of this amortized data structure is given on
+   the class web page */
+
+void stackinit() {
+
+  currentsize = 4;
+  stackpointer = 0;
+  A = (int*) calloc(currentsize, sizeof(int));
+
+  printf("initialized dynamic stack.\n");
+}
+
+void copyStack(int *A, int *B, int stackpointer) {
+  int i;
+  for (i = 0; i < stackpointer; ++i)
+    B[i] = A[i];
+}
+
+void increaseStack() {
+  int* B;
+
+  /*  printf("\nincrease stack from %d to %d\n",currentsize,2*currentsize);
+   */
+
+  /* allocate new memory */
+  B = (int*) calloc(currentsize*2, sizeof(int));
+  copyStack(A,B,stackpointer);
+  /* free old memory */
+  free(A);
+  /* assign pointer to new memory to A */
+  A = B;
+  /* update current size */
+  currentsize *= 2;
+
+}
+
+void shrinkStack() {
+  int* B;
+
+  /* printf("\ndecrease stack from %d to %d\n",currentsize,currentsize/2);
+   */
+  
+  /* allocate new memory */
+  B = (int*) calloc(currentsize/2, sizeof(int));
+  copyStack(A,B,stackpointer);
+  /* free old memory */
+  free(A);
+  /* assign pointer to new memory to B */
+  A = B;
+  /* update currentsize */
+  currentsize /= 2;
+}
+
+void push(int x) {
+  A[stackpointer++] = x;
+
+  if (stackpointer > 3 * currentsize / 4) 
+    increaseStack();
+}
+
+int pop() {
+  if (stackpointer <= 0) {
+    printf("stack underflow!");
+    exit(0);
+  }
+
+  if (stackpointer <= (currentsize / 4))
+    shrinkStack();
+
+  --stackpointer;
+  return A[stackpointer];
+
+}
+
+int top() {
+  if (stackpointer <= 0) {
+    printf("stack underflow!");
+    exit(0);
+  }
+  return A[stackpointer-1];
+}
+
+int stacksize() {
+  return stackpointer;
+}
+
+int isempty() {
+  return (stackpointer == 0);
+}
+Compiling and Using the Implementation
+We compile the implementation using the -c option:
+(slinky){biermann}[50]% gcc stack.c -c
+(slinky){biermann}[51]% gcc betterstack.c -c
+In order to create an executable for our test program, we have to link it with the stack implementation. The following calls to gcc creates the executables test_stack and test_better.
+(slinky){biermann}[52]% gcc test_stack.o stack.o -o test_stack
+(slinky){biermann}[53]% gcc test_stack.o betterstack.o -o test_better
+Problems:
+The implementation better_stack is potentially wasteful. In order to store n elements in the stack, how much memory is allocated at most?
+
+The analysis above is very generous. Can you find tighter bounds by calculating the running time for separate cases more precisely?
+
+Consider the following algorithm:
+If you are running out of space, allocate memory for n + k stack elements, where n is the current size of your stack and k some constant; copy over the data from your old stack, release the memory for the old stack, and use the newly allocated memory as stack.
+Starting with an empty stack, what's the running time for a sequence of m push operations?
+
+
+In this problem, we've the following stack update rules:
+double the stack size whenever you run out of space (allocate twice as much memory, copy over the data and release the old memory).
+If the stackpointer drops below n/2 where n is the current size of the stack, we reduce the stack size to n/2. (allocate half as much memory, copy over the data and release the old memory).
+Why is this algorithm potentially bad? Can you find a sequence of operations where every operation takes a lot of time? (Hint: come up with a situation where you need to adapt the size of the stack after each operation.)
+
+In my implementation, I chose 1/4 and 3/4 as thresholds when to increase or shrink the size of the stack. Can you come up with other such constants and a factor by how much you want to change the size of the stack? How would this effect running time and memory usage?
+
+Can you think of entirely different implementations of stack - which perform each update operation in constant time?
+Imagine a user program needs to have more than just one stack. How do you have to change the code above (header and implementation) to be able to create and operate on any number of stacks?

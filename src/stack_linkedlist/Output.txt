@@ -1,0 +1,6 @@
+Stack elements: 30->20->10->NULL
+Top element (peek): 30
+Popped element = 30
+After pop, stack elements: 20->10->NULL
+Popped element = 20
+After pop, stack elements: 10->NULL
